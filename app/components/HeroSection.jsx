@@ -12,8 +12,8 @@ const HeroSection = () => {
             you have.
           </h1>
           <p>
-            NutriGuide provides nutritional breakdowns for each recipe, helping
-            you make informed choices for a balanced lifestyle.
+            NutriGuide helps you find delicious recipes based on the ingredients
+            you already have. Save time, reduce waste, and cook like a pro.
           </p>
         </div>
 
