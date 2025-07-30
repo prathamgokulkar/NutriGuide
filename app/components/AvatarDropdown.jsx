@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import { useState } from "react";
 import React from "react";
@@ -8,17 +7,25 @@ const AvatarDropdown = () => {
 
   return (
     <div>
-      {/* Avatar button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden focus:outline-none border border-gray-400 cursor-pointer"
-      >
-        <img
-          src="/Avatar.jpeg"
-          alt="User Avatar"
-          className="w-full h-full object-cover"
-        />
-      </button>
+      <div className="relative flex items-center gap-8">
+        <Link href={"/login"}>
+          {" "}
+          <button className="bg-primary text-white py-2 px-4 rounded-lg cursor-pointer font-bold">
+            Login
+          </button>
+        </Link>
+        {/* Avatar button */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden focus:outline-none border border-gray-400 cursor-pointer"
+        >
+          <img
+            src="/Avatar.jpeg"
+            alt="User Avatar"
+            className="w-full h-full object-cover"
+          />
+        </button>
+      </div>
 
       {/* Dropdown menu */}
       {open && (

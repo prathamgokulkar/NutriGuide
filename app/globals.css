@@ -4,6 +4,9 @@
   .primary {
     @apply text-[#f78c11];
   }
+  .bg-primary {
+    @apply bg-[#f78c11];
+  }
 }
 body {
   background-color: #f6f6f6 !important;

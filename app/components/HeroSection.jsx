@@ -11,7 +11,7 @@ const HeroSection = () => {
             <span className="primary ">Fast</span>. Discover recipes with what
             you have.
           </h1>
-          <p>
+          <p className="text-lg md:text-xl">
             NutriGuide helps you find delicious recipes based on the ingredients
             you already have. Save time, reduce waste, and cook like a pro.
           </p>

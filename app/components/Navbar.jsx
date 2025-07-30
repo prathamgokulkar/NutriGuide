@@ -1,7 +1,13 @@
+"use client";
 import React from "react";
 import AvatarDropdown from "./AvatarDropdown";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
+  const pathname = usePathname();
+  const authRoutes = ["/login", "/signup"];
+
+  const showDropdown = !authRoutes.includes(pathname);
   return (
     <>
       <nav className="shadow-md">
@@ -12,10 +18,11 @@ const Navbar = () => {
               NutriGuide
             </a>
           </div>
-          {/* avatar */}
-          <div className="">
-            <AvatarDropdown></AvatarDropdown>
-          </div>
+          {showDropdown && (
+            <div>
+              <AvatarDropdown></AvatarDropdown>
+            </div>
+          )}
         </div>
       </nav>
     </>

@@ -12,7 +12,7 @@ const ExploreCard = () => {
         "ExploreImage4.jpeg",
       ].map((item, index) => (
         <Link href="/input" key={index}>
-          <div className="w-64 h-64 overflow-hidden rounded-lg shadow-md">
+          <div className="w-full h-64 sm:h-60 overflow-hidden rounded-lg shadow-md object-cover">
             <img
               src={`/${item}`}
               alt="Explore Recipies"
