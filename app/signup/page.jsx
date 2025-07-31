@@ -19,7 +19,6 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",

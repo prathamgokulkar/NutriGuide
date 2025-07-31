@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { signIn } from "next-auth/react";
 
 const page = () => {
   const [formData, setFormData] = useState({
@@ -18,26 +19,16 @@ const page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Login successful");
-        window.location.href = "/";
-      } else {
-        throw new Error(data.error || "Something went wrong");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert(error.message);
+    const res = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false,
+    });
+    if (res.ok) {
+      alert("Login successful");
+      window.location.href = "/";
+    } else {
+      alert(res.error || "Login failed");
     }
   };
 
@@ -52,6 +43,7 @@ const page = () => {
 
           <div className="space-y-4">
             <input
+              name="email"
               onChange={handleChange}
               type="email"
               placeholder="Enter your email"
@@ -59,6 +51,7 @@ const page = () => {
             />
 
             <input
+              name="password"
               onChange={handleChange}
               type="password"
               placeholder="Enter password"

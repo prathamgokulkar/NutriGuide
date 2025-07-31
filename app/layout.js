@@ -1,6 +1,6 @@
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import { SessionProvider } from "next-auth/react";
+import SessionWrapper from "./components/SessionWrapper";
 
 export const metadata = {
   title: "NutriGuide",
@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Navbar />
-        <SessionProvider>{children}</SessionProvider>
+        <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>
   );
