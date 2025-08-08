@@ -1,10 +1,20 @@
+# app/main.py
 from fastapi import FastAPI
-from app.api.recipe import router as recipe_router
+from fastapi.middleware.cors import CORSMiddleware
+from app.api import recipe
 
 app = FastAPI()
 
-app.include_router(recipe_router, prefix="/api/recipe", tags=["recipe"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Set your frontend URL in prod
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(recipe.router, prefix="/api/recipe")
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI backend is running"}
+    return {"message": "NutriGuide backend is running"}

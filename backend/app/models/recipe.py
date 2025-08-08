@@ -1,4 +1,8 @@
+# app/models/recipe.py
 from pydantic import BaseModel
 
-class RecipeQuery(BaseModel):
+class QueryRequest(BaseModel):
     query: str
+
+class QueryResponse(BaseModel):
+    answer: str
