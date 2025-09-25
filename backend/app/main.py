@@ -1,20 +1,15 @@
-# app/main.py
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api import recipe
 
-app = FastAPI()
+# Create the FastAPI app instance
+app = FastAPI(title="NutriGuide API")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Set your frontend URL in prod
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/", tags=["Root"])
+def read_root():
+    """A simple endpoint to confirm the API is running."""
+    return {"message": "Welcome to the NutriGuide API!"}
 
-app.include_router(recipe.router, prefix="/api/recipe")
-
-@app.get("/")
-def root():
-    return {"message": "NutriGuide backend is running"}
+# In the future, you will include your routers here
+# from .api import users, recipes, tracking
+# app.include_router(users.router)
+# app.include_router(recipes.router)
+# app.include_router(tracking.router)

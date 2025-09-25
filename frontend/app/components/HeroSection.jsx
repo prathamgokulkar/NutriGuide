@@ -41,7 +41,7 @@ const HeroSection = () => {
             you already have. Save time, reduce waste, and cook like a pro.
           </p>
           <Link
-            href={"/recipeform"}
+            href={"/"}
             type="button"
             className="bg-primary inline-block mt-4 text-white py-2 px-6 rounded-lg font-bold transition-colors hover:bg-amber-600"
           >

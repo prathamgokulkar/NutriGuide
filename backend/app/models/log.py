@@ -1,0 +1,1 @@
+# Pydantic models for a meal log entry
