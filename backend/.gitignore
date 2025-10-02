@@ -1,0 +1,21 @@
+# Virtual Environment
+myenv/
+venv/
+
+# Databases
+*.db
+*.sqlite3
+chroma_db/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# VSCode specific
+.vscode/
+
+features.txt
+

@@ -1,0 +1,1 @@
+# Logic to process images with the CV model

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+python-dotenv
+pandas 
+sentence-transformers 
+chromadb 
+tqdm
+ollama
+chromadb
+email-validator
