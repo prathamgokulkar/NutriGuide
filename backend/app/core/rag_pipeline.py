@@ -1,7 +1,6 @@
 # Logic for the RAG system (VectorDB + LLM)
 import chromadb
 from sentence_transformers import SentenceTransformer
-from langchain.embeddings import HuggingFaceEmbeddings
 from sqlalchemy.orm import Session
 from ..db.models import Recipe
 from langchain_groq import ChatGroq
@@ -27,46 +26,58 @@ class RAGPipeline:
 
     # Perform embedding -> query -> retrieve
     def search_recipes(self, query: str, db: Session, top_k: int = 5):
-        query_embedding = self.model.encode(query, convert_to_tensor=False).tolist()
-
+        direct_hit = db.query(Recipe).filter(Recipe.name.ilike(f'%{query}%')).first()
+        if direct_hit:
+            print(f"Direct hit found for query: {query}")
+            return [direct_hit]
+        
+        print(f"No direct hit. Performing vector search for query: {query}")
+        query_embedding = self.model.encode(query).tolist()
         results = self.collection.query(
             query_embeddings = [query_embedding],
-            n_results=top_k
+            n_results = top_k
         )
-
-        recipes_ids = results['ids'][0]
-        if not recipes_ids:
+        recipe_ids_str = results.get('ids', [[]])[0]
+        if not recipe_ids_str:
             return []
         
-        int_recipe_ids = [int(id) for id in recipes_ids]
-
-        recipes = db.query(Recipe).filter(Recipe.id.in_(int_recipe_ids)).all()
-
+        recipe_ids = [int(id_str) for id_str in recipe_ids_str]
+        recipes = db.query(Recipe).filter(Recipe.id.in_(recipe_ids)).all()
         return recipes
-    
-    def generate_response(self, query: str, context_recipes: list) -> str:
+
+    def generate_response(self, query: str, context_recipes: list, user_goal: str, chat_history: list) -> str:
         context_str = ""
         for recipe in context_recipes:
-            context_str += f"Recipe: {recipe.name}\n"
+            context_str += f"--- Recipe: {recipe.name} ---\n"
             context_str += f"Minutes: {recipe.minutes}\n"
-            context_str += f"Ingredients: {recipe.ingredients}\n"
-            context_str += "\n"
-    
-        prompt = f"""
-        You are a helpful and friendly nutrition assistant called NutriGuide.
-        Use the following retrieved recipe context to answer the user's question.
-        Suggest one or two of the best options from the context and briefly explain why they are a good fit.
-        If the context is empty or none of the recipes are a good match, just say that you couldn't find a suitable recipe. Do not make anything up.
+            context_str += f"Calories: {recipe.calories}\n"
+            context_str += f"Description: {recipe.description}\n\n"
+        
+        history_str = "\n".join([f"{msg.sender}: {msg.message}" for msg in chat_history])
 
-        CONTEXT:
+        prompt = f"""
+        You are NutriGuide, a friendly and expert nutrition assistant. Your goal is to help the user achieve their health objectives.
+
+        **User's Health Goal:** {user_goal.replace('_', ' ')}
+
+        **Instructions:**
+        1. Analyze the user's question in the context of their CHAT HISTORY.
+        2. Use the retrieved RECIPE CONTEXT to find the best one or two matches.
+        3. **Crucially, explicitly mention how your suggestion aligns with the user's health goal.** For example, "Based on your goal of weight loss, this low-calorie recipe is a great choice."
+        4. If the user asks a follow-up question, use the CHAT HISTORY to understand what they are referring to.
+        5. Format your final response using Markdown. If suggesting recipes, number them and separate with a horizontal rule (---).
+
+        **CHAT HISTORY:**
+        {history_str}
+
+        **RECIPE CONTEXT:**
         {context_str}
 
-        USER'S QUESTION:
+        **User's Latest Question:**
         {query}
 
-        ASSISTANT'S RESPONSE:
+        **ASSISTANT'S RESPONSE:**
         """
-
         response = self.llm.invoke(prompt)
         return response.content
 

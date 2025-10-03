@@ -25,7 +25,21 @@ class UserProfile(BaseModel):
     onboarding_complete: bool
 
     class Config:
-        orm_mode = True
+        from_attribute = True
+
+class UserRead(BaseModel):
+    id: int
+    name: str
+    email: str
+    height_cm: float | None = None
+    weight_kg: float | None = None
+    age: int | None = None
+    goal: str | None = None
+    tdee: int | None = None
+
+    class Config:
+        from_attributes = True 
+
 
 @router.post("/{user_id}/onboarding", response_model=UserRead)
 def onboard_user(user_id: int, onboarding_data: UserOnboarding, db: Session = Depends(get_db)):
@@ -35,6 +49,15 @@ def onboard_user(user_id: int, onboarding_data: UserOnboarding, db: Session = De
 
     for field, value in onboarding_data.model_dump().items():
         setattr(db_user, field, value)
+
+    nutritional_needs = calculate_nutritional_needs(
+        gender=db_user.gender,
+        weight_kg=db_user.weight_kg,
+        height_cm=db_user.height_cm,
+        age=db_user.age,
+        activity_level=db_user.activity_level
+    )
+    db_user.tdee = nutritional_needs['tdee']
 
     db.commit()
     db.refresh(db_user)

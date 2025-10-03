@@ -1,5 +1,5 @@
 from .base import Base
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text,ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -38,3 +38,18 @@ class User(Base):
     gender = Column(String, nullable=True)
     activity_level = Column(String, nullable=True)
     goal = Column(String, nullable=True)
+    tdee = Column(Integer, nullable=True)
+
+    chat_history = relationship("ChatHistory", back_populates="user")
+
+class ChatHistory(Base):
+    __tablename__ ="chat_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    session_id = Column(String, nullable=False, index=True)
+    sender = Column(String)
+    message = Column(String)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="chat_history")
