@@ -9,3 +9,8 @@ tqdm
 ollama
 chromadb
 email-validator
+langchain
+langchain-community
+langchain-core
+huggingface-hub
+langchain-groq

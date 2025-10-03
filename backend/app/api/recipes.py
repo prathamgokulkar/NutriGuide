@@ -6,7 +6,7 @@ from typing import List
 from pydantic import BaseModel
 
 from ..dependencies import get_db
-from ..core.rag_pipeline import RAGPipeline
+from ..core.rag_pipeline import rag_system
 
 router = APIRouter(
     prefix="/recipes",
@@ -25,10 +25,24 @@ class RecipeSchema(BaseModel):
     description: str | None= None
     calories: float | None= None
 
-    class config:
-        orm_mode = True
+    class Config:
+        from_attributes = True
+
+class ChatResponse(BaseModel):
+    response: str
 
 @router.post("/search", response_model=List[RecipeSchema])
 def search_recipes(search_query: SearchQuery, db: Session = Depends(get_db)):
-    recipes = RAGPipeline.search(query = search_query.query, db=db)
+    recipes = rag_system.search_recipes(query = search_query.query, db=db)
     return recipes
+
+@router.post("/chat", response_model=ChatResponse)
+def chat_with_rag(search_query: SearchQuery, db: Session = Depends(get_db)):
+    retrieved_recipes = rag_system.search(query = search_query.query, db=db)
+
+    if not retrieved_recipes:
+        return ChatResponse(response="I'm sorry, I couldn't find any recipes that match your request. Please try asking in a different way.")
+
+    llm_response = rag_system.generate_response(query=search_query.query, context_recipes=retrieved_recipes)
+
+    return ChatResponse(response=llm_response)
