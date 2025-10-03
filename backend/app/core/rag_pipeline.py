@@ -45,6 +45,7 @@ class RAGPipeline:
         recipes = db.query(Recipe).filter(Recipe.id.in_(recipe_ids)).all()
         return recipes
 
+
     def generate_response(self, query: str, context_recipes: list, user_goal: str, chat_history: list) -> str:
         context_str = ""
         for recipe in context_recipes:
@@ -55,28 +56,28 @@ class RAGPipeline:
         
         history_str = "\n".join([f"{msg.sender}: {msg.message}" for msg in chat_history])
 
+
         prompt = f"""
         You are NutriGuide, a friendly and expert nutrition assistant. Your goal is to help the user achieve their health objectives.
 
         **User's Health Goal:** {user_goal.replace('_', ' ')}
 
         **Instructions:**
-        1. Analyze the user's question in the context of their CHAT HISTORY.
-        2. Use the retrieved RECIPE CONTEXT to find the best one or two matches.
-        3. **Crucially, explicitly mention how your suggestion aligns with the user's health goal.** For example, "Based on your goal of weight loss, this low-calorie recipe is a great choice."
-        4. If the user asks a follow-up question, use the CHAT HISTORY to understand what they are referring to.
-        5. Format your final response using Markdown. If suggesting recipes, number them and separate with a line space(\n).
+        1.  Analyze the user's latest question in the context of the entire CHAT HISTORY.
+        2.  **General Search:** If the user is asking for a new type of recipe, use the retrieved RECIPE CONTEXT to suggest the best options that align with the user's health goal.
+        3.  **Modification Request:** If the user asks to **modify** the most recently discussed recipe (e.g., "make it vegan," "what can I use instead of chicken?"), use the CHAT HISTORY to identify that recipe and its ingredients. Then, use your general culinary knowledge to suggest a suitable substitution and explain how to adapt the recipe.
+        4.  Format your response clearly using Markdown.
 
-        **CHAT HISTORY:**
+        **CHAT HISTORY (for context):**
         {history_str}
 
-        **RECIPE CONTEXT:**
+        **RECIPE CONTEXT (from a new search, may be empty if this is a follow-up question):**
         {context_str}
 
         **User's Latest Question:**
         {query}
 
-        **ASSISTANT'S RESPONSE:**
+        **ASSISTANT'S RESPONSE:
         """
         response = self.llm.invoke(prompt)
         return response.content
