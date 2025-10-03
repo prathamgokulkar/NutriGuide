@@ -29,3 +29,27 @@ def calculate_nutritional_needs(
         "bmr": round(bmr),
         "tdee": round(tdee)
     }
+
+# Calculate the macro split based on goals for daily intake
+def calculate_macro_split(tdee: int, goal: str) ->dict:
+    if goal == "weight_loss":
+        percentages = {'protein': 0.40, 'carbs': 0.30, 'fats': 0.30}
+    elif goal == 'muscle_gain':
+        percentages = {'protein': 0.35, 'carbs': 0.40, 'fats': 0.25}
+    else:
+        percentages = {'protein': 0.30, 'carbs': 0.40, 'fats': 0.30}
+
+    protein_calories = tdee * percentages['protein']
+    carb_calories = tdee * percentages['carbs']
+    fat_calories = tdee * percentages['fats']
+
+    protein_grams = round(protein_calories/4)
+    carb_grams = round(carb_calories / 4)
+    fat_grams = round(fat_calories / 9)
+
+    return{
+        "protein_g": protein_grams,
+        "carbs_g": carb_grams,
+        "fats_g": fat_grams,
+        "total_calories": tdee
+    }

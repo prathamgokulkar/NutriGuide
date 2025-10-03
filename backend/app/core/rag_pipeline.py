@@ -65,7 +65,7 @@ class RAGPipeline:
         2. Use the retrieved RECIPE CONTEXT to find the best one or two matches.
         3. **Crucially, explicitly mention how your suggestion aligns with the user's health goal.** For example, "Based on your goal of weight loss, this low-calorie recipe is a great choice."
         4. If the user asks a follow-up question, use the CHAT HISTORY to understand what they are referring to.
-        5. Format your final response using Markdown. If suggesting recipes, number them and separate with a horizontal rule (---).
+        5. Format your final response using Markdown. If suggesting recipes, number them and separate with a line space(\n).
 
         **CHAT HISTORY:**
         {history_str}

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import users
 from app.api import recipes
+from app.api import dashboard
 
 app = FastAPI(title="NutriGuide API")
 
@@ -25,4 +26,5 @@ def read_root():
 app.include_router(users.router)
 
 app.include_router(recipes.router)
-# app.include_router(tracking.router)
+
+app.include_router(dashboard.router)

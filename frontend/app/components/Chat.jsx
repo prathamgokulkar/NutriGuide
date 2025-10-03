@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';     
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const Chat = () => {
     const { data: session } = useSession();
@@ -63,8 +64,9 @@ const Chat = () => {
                 {messages.map((msg, index) => (
                     <div key={index} className={`my-2 flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`p-3 rounded-lg max-w-md ${msg.sender === 'user' ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                            <ReactMarkdown>{msg.text}</ReactMarkdown>
-                        </div>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {msg.text}
+                            </ReactMarkdown>                        </div>
                     </div>
                 ))}
                 {isLoading && (
