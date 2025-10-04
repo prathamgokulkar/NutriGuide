@@ -79,3 +79,11 @@ def chat_with_rag(chat_query: ChatQuery, db: Session = Depends(get_db)):
     db.commit()
 
     return ChatResponse(response=llm_response)
+
+@router.get("/{recipe_id}", response_model=RecipeSchema)
+def get_recipe_by_id(recipe_id: int, db: Session = Depends(get_db)):
+    
+    recipe = db.query(db_models.Recipe).filter(db_models.Recipe.id == recipe_id).first()
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return recipe

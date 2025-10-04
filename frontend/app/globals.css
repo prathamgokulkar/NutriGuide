@@ -27,3 +27,25 @@ body {
   animation: fade-out 1s ease-out forwards;
   animation-delay: 2s;
 }
+
+
+/* globals.css */
+.scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #4ade80 #d1fae5; /* Thumb | Track */
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: #d1fae5;
+  border-radius: 9999px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #4ade80;
+  border-radius: 9999px;
+  border: 2px solid #d1fae5;
+}

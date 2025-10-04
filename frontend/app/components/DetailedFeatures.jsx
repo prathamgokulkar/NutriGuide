@@ -19,7 +19,7 @@ const features = [
     title: "Interactive Progress Dashboard",
     description:
       "Stay motivated by visually tracking your daily calories, protein, carbs, and fats against your personalized targets.",
-    image: "/feature-dashboard.png",
+    image: "/sliding_img2.png",
   },
   {
     title: "Goal-Oriented Planning",
