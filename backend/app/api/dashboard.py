@@ -46,7 +46,7 @@ def log_meal(meal_log: MealLog, db: Session = Depends(get_db)):
         carbs_g= recipe.carbohydrates_pdv,
         fat_g=recipe.total_fat_pdv
     )
-    db.add()
+    db.add(new_log)
     db.commit()
     return{"message": "Meal logged successfully"}
 
@@ -66,7 +66,7 @@ def get_daily_summary(user_id: int, db: Session = Depends(get_db)):
         func.sum(db_models.MealLog.carbs_g).label("carbs_g"),
         func.sum(db_models.MealLog.fat_g).label("fat_g")
     ).filter(
-        db_models.MeanLog.owner_id == user_id,
+        db_models.MealLog.owner_id == user_id,
         func.date(db_models.MealLog.date) == today
     ).first()
 

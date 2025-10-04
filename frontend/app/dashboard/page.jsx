@@ -1,13 +1,19 @@
-import Chat from '@/app/components/Chat';
+import Layout from '@/app/components/Layout';
+import Dashboard from '@/app/components/Dashboard';
 
-export default function Dashboard() {
+export default function DashboardPage() {
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-12 bg-gray-50">
-            <div className="w-full text-center mb-8">
-                <h1 className="text-4xl font-bold text-gray-800">NutriGuide</h1>
-                <p className="text-lg text-gray-600 mt-2">Your AI-Powered Recipe Assistant</p>
+        <Layout>
+            <div className="py-6">
+                <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 className="text-3xl font-bold leading-tight text-gray-900">
+                        Your Daily Progress
+                    </h1>
+                </header>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+                    <Dashboard />
+                </div>
             </div>
-            <Chat />
-        </main>
+        </Layout>
     );
 }

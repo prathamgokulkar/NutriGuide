@@ -2,6 +2,8 @@ from .base import Base
 from sqlalchemy import Column, Integer, String, Float, Text,ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from datetime import date
+
 
 class Recipe(Base):
     __tablename__ = "recipes"
@@ -40,6 +42,7 @@ class User(Base):
     goal = Column(String, nullable=True)
     tdee = Column(Integer, nullable=True)
 
+    meal_logs = relationship("MealLog", back_populates="owner")
     chat_history = relationship("ChatHistory", back_populates="user")
 
 class ChatHistory(Base):
@@ -53,3 +56,17 @@ class ChatHistory(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="chat_history")
+
+class MealLog(Base):
+    __tablename__ = "meal_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(DateTime, default=date.today)
+    meal_name = Column(String, index=True)
+    calories = Column(Float)
+    protein_g = Column(Float)
+    carbs_g = Column(Float)
+    fat_g = Column(Float)
+    
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="meal_logs")

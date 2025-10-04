@@ -51,7 +51,7 @@ const Onboarding = () => {
 
       if (res.ok) {
         // Redirect to the main dashboard after successful onboarding
-        router.push("/dashboard");
+        router.replace("/dashboard");
       } else {
         const data = await res.json();
         setError(data.detail || "Onboarding failed. Please try again.");

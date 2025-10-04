@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 @layer components {
   .primary {
@@ -9,7 +10,7 @@
   }
 }
 body {
-  background-color: #f6f6f6 !important;
+  background-color: white !important;
   color: black;
 }
 
