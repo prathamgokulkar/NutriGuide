@@ -6,7 +6,6 @@ import BrowseAction from './BrowseAction';
 const LoggedInHero = () => {
     const { data: session, status } = useSession();
 
-    // Only render this component if the user is authenticated
     if (status !== 'authenticated') {
         return null;
     }

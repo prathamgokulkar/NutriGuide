@@ -48,7 +48,7 @@ const page = () => {
     });
 
     if (loginRes.ok) {
-      router.push("/auth/callback");
+      router.replace("/auth/callback");
     } else {
       setWarning("⚠️ Invalid email or password");
       router.push("/signup");

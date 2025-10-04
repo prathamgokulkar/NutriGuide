@@ -61,7 +61,7 @@ const Signup = () => {
         });
 
         if (loginRes.ok) {
-          router.push("/auth/callback");
+          router.replace("/auth/callback");
         } else {
           setWarning("⚠️ Signup successful but login failed.");
         }

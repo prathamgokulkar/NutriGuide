@@ -8,7 +8,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 // A small, reusable component for our stat cards
 const StatCard = ({ title, consumed, target, unit }) => (
-    <div className="stat bg-base-100 shadow rounded-lg">
+    <div className="stat bg-white-100 shadow rounded-lg">
         <div className="stat-title">{title}</div>
         <div className="stat-value text-2xl">{Math.round(consumed)} / {target}</div>
         <div className="stat-desc">{unit}</div>
@@ -91,7 +91,7 @@ const Dashboard = () => {
             </div>
 
             {/* Main Chart */}
-            <div className="p-4 bg-base-100 shadow rounded-lg">
+            <div className="p-4 bg-white-100 shadow rounded-lg">
                 <Bar options={chartOptions} data={chartData} />
             </div>
         </div>

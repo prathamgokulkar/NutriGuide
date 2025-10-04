@@ -15,9 +15,9 @@ export default function AuthCallback() {
 
     if (status === "authenticated") {
       if (session.user.onboardingComplete) {
-        router.push("/dashboard");
+        router.replace("/dashboard");
       } else {
-        router.push("/onboarding");
+        router.replace("/onboarding");
       }
     }
 

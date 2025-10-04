@@ -60,7 +60,7 @@ const SlidingFeatures = () => {
         >
           {features.map((feature, index) => (
             <SwiperSlide key={index}>
-              <div className="card lg:card-side bg-base-100 shadow-xl border rounded-2xl">
+              <div className="card lg:card-side bg-white-100 shadow-xl border rounded-2xl">
                 <figure className="lg:w-1/2">
                   <img
                     src={feature.image}
