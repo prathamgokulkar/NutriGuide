@@ -41,7 +41,7 @@ class UserRead(BaseModel):
         from_attributes = True 
 
 
-@router.post("/{user_id}/onboarding", response_model=UserRead)
+@router.post("/{user_id}/onboard", response_model=UserRead)
 def onboard_user(user_id: int, onboarding_data: UserOnboarding, db: Session = Depends(get_db)):
     db_user = db.query(db_models.User).filter(db_models.User.id == user_id).first()
     if not db_user:

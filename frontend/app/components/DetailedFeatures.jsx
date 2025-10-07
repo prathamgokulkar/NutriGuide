@@ -25,7 +25,7 @@ const features = [
     title: "Goal-Oriented Planning",
     description:
       "Whether your goal is weight loss or muscle gain, every suggestion is tailored to help you succeed.",
-    image: "/feature-planner.png",
+    image: "/sliding_img3.png",
   },
 ];
 

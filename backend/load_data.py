@@ -1,29 +1,48 @@
 import pandas as pd
-import chromadb
-import ast  
+import ast
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 from tqdm import tqdm
+import os
+from pinecone import Pinecone, ServerlessSpec 
 
 from app.db.session import SessionLocal
 from app.db.models import Recipe
 
 DATA_FILE_PATH = "recipes.csv"
-CHROMA_DB_PATH = "chroma_db"
-MODEL_NAME = 'all-MiniLM-L6-v2' 
-COLLECTION_NAME = "recipes"
+MODEL_NAME = 'all-MiniLM-L6-v2'
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
+PINECONE_INDEX_NAME = "nutriguide"
 
-print("Initializing models and database clients...")
-model = SentenceTransformer(MODEL_NAME, device='cuda')
-client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
-collection = client.get_or_create_collection(name=COLLECTION_NAME)
-db: Session = SessionLocal()
+print("Initializing Pinecone client...")
+from pinecone import Pinecone
+
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+
+index_name = "intelliagent-index"
+
+if index_name not in pc.list_indexes().names():
+    print(f"Creating new Pinecone index: {index_name}")
+    pc.create_index(
+        name=index_name,
+        dimension=384,
+        metric='cosine',
+        spec=ServerlessSpec(
+            cloud='aws',
+            region='us-east-1'
+        )
+    )
+
+index = pc.Index(index_name)
+
+print("Pinecone initialized.")
 print("Initialization complete.")
+
 
 print(f"Loading data from {DATA_FILE_PATH}...")
 df = pd.read_csv(DATA_FILE_PATH)
 
-# Data Cleaning and Preprocessing
 columns_to_keep = [
     'id', 'name', 'minutes', 'tags', 'n_steps', 'n_ingredients', 
     'description', 'ingredients', 'nutrition', 'steps'
@@ -42,7 +61,6 @@ def parse_nutrition(nutrition_str):
 nutrition_df = df['nutrition'].apply(parse_nutrition)
 df = pd.concat([df.drop('nutrition', axis=1), nutrition_df], axis=1)
 
-print("Creating text for embeddings...")
 def clean_tags(tags_str):
     try:
         return tags_str.replace("[", "").replace("]", "").replace("'", "").replace("-", " ").replace(", ", " ")
@@ -53,14 +71,17 @@ df['embedding_text'] = df['name'].fillna('') + '. Tags: ' + \
                        df['tags'].apply(clean_tags).fillna('') + '. Description: ' + \
                        df['description'].fillna('') + '. Ingredients: ' + \
                        df['ingredients'].str.replace(r'[\[\]\']', '', regex=True).fillna('')
-
 print("Data loaded and preprocessed.")
 
 
-# POPULATE SQLITE (Relational DB)
-print("Populating SQLite database...")
+print("Populating PostgreSQL database...")
+for _, row in tqdm(df.iterrows(), total=df.shape[0], desc="Populating PostgreSQL"):
+    recipe = Recipe(**row.to_dict())
+
+print("Populating PostgreSQL database...")
 db: Session = SessionLocal()
-for _, row in tqdm(df.iterrows(), total=df.shape[0], desc="Populating SQLite"):
+for _, row in tqdm(df.iterrows(), total=df.shape[0], desc="Populating PostgreSQL"):
+   
     recipe = Recipe(
         id=row['id'],
         name=row['name'],
@@ -75,34 +96,14 @@ for _, row in tqdm(df.iterrows(), total=df.shape[0], desc="Populating SQLite"):
         total_fat_pdv=row['total_fat_pdv'],
         sugar_pdv=row['sugar_pdv'],
         sodium_pdv=row['sodium_pdv'],
-        protein_pdv=row['protein_pdv'],
+        protein_pdv=row['protein_pdd'],
         saturated_fat_pdv=row['saturated_fat_pdv'],
         carbohydrates_pdv=row['carbohydrates_pdv']
     )
     db.add(recipe)
 
-print("Committing data to SQLite...")
+print("Committing data to PostgreSQL...")
 db.commit()
 db.close()
-print("SQLite populated successfully.")
-
-
-# Populate ChromaDB (Vector DB)
-print("Generating and storing embeddings. This will take a long time...")
-batch_size = 512
-total_batches = len(df) // batch_size + (1 if len(df) % batch_size > 0 else 0)
-
-for i in tqdm(range(0, len(df), batch_size), total=total_batches, desc="Embedding Batches"):
-    batch_df = df.iloc[i:i+batch_size]
-    
-    texts = batch_df['embedding_text'].tolist()
-    ids = [str(id) for id in batch_df['id'].tolist()]
-    
-    embeddings = model.encode(texts, show_progress_bar=False).tolist()
-    
-    collection.add(
-        embeddings=embeddings,
-        ids=ids
-    )
-
-print("Embeddings generated and stored.")
+print("PostgreSQL populated successfully.")
+print("\n--- Data migration complete! ---")

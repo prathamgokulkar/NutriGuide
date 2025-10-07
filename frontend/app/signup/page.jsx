@@ -1,23 +1,17 @@
 "use client";
-import React from "react";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import styles from "./page.module.css";
+import Link from "next/link";
 import { IoPerson } from "react-icons/io5";
-import { FaUnlock } from "react-icons/fa";
+import { FaUnlock, FaGoogle } from "react-icons/fa6";
 import { MdAlternateEmail } from "react-icons/md";
-import { FaGoogle } from "react-icons/fa6";
 
-const Signup = () => {
+const SignupPage = () => {
   const router = useRouter();
   const [warning, setWarning] = useState("");
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
 
   useEffect(() => {
     if (warning) {
@@ -28,15 +22,11 @@ const Signup = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.name || !formData.email || !formData.password) {
       setWarning("⚠️ All fields are required");
       return;
@@ -45,9 +35,7 @@ const Signup = () => {
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
@@ -63,88 +51,85 @@ const Signup = () => {
         if (loginRes.ok) {
           router.replace("/auth/callback");
         } else {
-          setWarning("⚠️ Signup successful but login failed.");
+          setWarning("⚠️ Signup successful, but auto-login failed.");
         }
       } else {
-        if (data?.error === "User already exists") {
-          setWarning("⚠️ User already exists");
-        } else {
-          setWarning("⚠️ Signup failed");
-        }
+        setWarning(data?.error || "⚠️ Signup failed");
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setWarning("⚠️ Server error, please try again later.");
+      setWarning("⚠️ Server error. Please try again later.");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-sm space-y-6"
-      >
-        <h2 className="text-2xl font-bold text-center">Sign Up</h2>
+    <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-4">
+      <div className="card w-full max-w-sm bg-white shadow-xl p-6 sm:p-8">
+        <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
 
-        <div className="space-y-4">
-          <div className="relative">
-            <IoPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-4">
+          <label className="input input-bordered flex items-center gap-2 rounded-full bg-white border-zinc-800">
+            <IoPerson className="text-gray-400" />
             <input
-              name="name"
-              onChange={handleChange}
               type="text"
-              placeholder="Enter your name"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
-
-          <div className="relative">
-            <MdAlternateEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            <input
-              name="email"
+              name="name"
+              className="grow"
+              placeholder="Name"
+              value={formData.name}
               onChange={handleChange}
+            />
+          </label>
+          <label className="input input-bordered flex items-center gap-2 rounded-full bg-white border-zinc-800">
+            <MdAlternateEmail className="text-gray-400" />
+            <input
               type="email"
-              placeholder="Enter your email"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
-
-          <div className="relative">
-            <FaUnlock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            <input
-              name="password"
+              name="email"
+              className="grow"
+              placeholder="Email"
+              value={formData.email}
               onChange={handleChange}
-              type="password"
-              placeholder="Enter password"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <button
-            type="submit"
-            className="w-full bg-amber-500 py-2 px-4 rounded-md hover:bg-amber-600 transition duration-300 text-white"
-          >
+          </label>
+          <label className="input input-bordered flex items-center gap-2 rounded-full bg-white border-zinc-800">
+            <FaUnlock className="text-gray-400" />
+            <input
+              type="password"
+              name="password"
+              className="grow"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </label>
+          <button type="submit" className="bg-[#f78c11] rounded-full text-white px-4 py-2 hover:bg-[#e07b00] transition">
             Sign Up
           </button>
+        </form>
 
-          <div className="relative">
-            <FaGoogle className="absolute left-16 top-1/2 transform -translate-y-1/2 text-white" />
-            <button
-              className="w-full bg-blue-500 py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 text-white"
-              onClick={() =>
-                signIn("google", { callbackUrl: "http://127.0.0.1:8000/api/users/onboard" })
-              }
-            >
-              Sign in with Google
-            </button>
-          </div>
-          {warning && <div className={styles.warningBox}>{warning}</div>}
+        <p className="text-center text-sm text-gray-500">
+          Already have an account?{" "}
+          <Link href="/login" className="link link-primary font-bold">
+            Log in
+          </Link>
+        </p>
+
+        <div className="divider my-6">OR</div>
+
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            className="btn btn-outline rounded-full hover:bg-[#f78c11] transition"
+            onClick={() => signIn("google", { callbackUrl: "/auth/callback" })}
+          >
+            <FaGoogle />
+            Sign up with Google
+          </button>
         </div>
-      </form>
+        
+        {warning && <div className="alert alert-warning mt-4">{warning}</div>}
+      </div>
     </div>
   );
 };
 
-export default Signup;
+export default SignupPage;
