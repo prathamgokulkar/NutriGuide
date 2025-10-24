@@ -26,7 +26,7 @@ const LogMealButton = ({ recipeId }) => {
             if (!res.ok) throw new Error('Failed to log meal');
             
             setStatus('success');
-            router.push('/dashboard');
+            router.replace('/dashboard');
 
         } catch (error) {
             console.error(error);

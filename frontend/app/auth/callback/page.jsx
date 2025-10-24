@@ -22,7 +22,7 @@ export default function AuthCallback() {
     }
 
     if (status === "unauthenticated") {
-        router.push("/login");
+        router.replace("/login");
     }
 
   }, [session, status, router]);
