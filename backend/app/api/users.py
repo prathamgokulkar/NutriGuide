@@ -95,3 +95,7 @@ def get_or_create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         name=new_user.name,
         onboarding_complete=False
     )
+
+@router.get("/test-user-route")
+def test_user_route():
+    return {"message": "Users router is working!"}

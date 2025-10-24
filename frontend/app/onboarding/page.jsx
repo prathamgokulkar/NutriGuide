@@ -28,44 +28,58 @@ const OnboardingPage = () => {
     setIsLoading(true);
 
     if (!session?.user?.id) {
-      setError("Could not get user ID. Please try logging in again.");
-      setIsLoading(false);
-      return;
+        setError("Could not get user ID. Please try logging in again.");
+        setIsLoading(false);
+        return;
     }
-
     const userId = session.user.id;
 
     if (!formData.height_cm || !formData.weight_kg || !formData.age) {
-      setError("Please fill out your height, weight, and age.");
-      setIsLoading(false);
-      return;
+        setError("Please fill out your height, weight, and age.");
+        setIsLoading(false);
+        return;
     }
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/users/${userId}/onboard`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          height_cm: parseFloat(formData.height_cm),
-          weight_kg: parseFloat(formData.weight_kg),
-          age: parseInt(formData.age),
-        }),
-      });
+        const res = await fetch(`http://127.0.0.1:8000/users/${userId}/onboard`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ...formData,
+                height_cm: parseFloat(formData.height_cm),
+                weight_kg: parseFloat(formData.weight_kg),
+                age: parseInt(formData.age),
+            }),
+        });
 
-      if (res.ok) {
-        router.replace("/dashboard?welcome=true");
-      } else {
-        const data = await res.json();
-        setError(data.detail || "Onboarding failed. Please try again.");
-      }
+        if (res.ok) {
+            router.replace("/dashboard?welcome=true"); // Redirect to homepage
+        } else {
+            const data = await res.json();
+            // --- MORE ROBUST ERROR HANDLING ---
+            if (res.status === 422 && data.detail && Array.isArray(data.detail) && data.detail.length > 0) {
+                // Handle FastAPI validation errors
+                const firstError = data.detail[0];
+                const fieldName = Array.isArray(firstError.loc) && firstError.loc.length > 1 ? firstError.loc[1] : 'field';
+                const errorMsg = firstError.msg || 'Invalid input';
+                setError(`Validation Error: ${errorMsg} (Field: ${fieldName})`);
+            } else if (data.detail && typeof data.detail === 'string') {
+                 // Handle other FastAPI errors where 'detail' is a string
+                setError(data.detail);
+            } else {
+                 // Fallback for unexpected errors or structures
+                setError("Onboarding failed due to an unexpected error. Please try again.");
+            }
+            // --- END ROBUST HANDLING ---
+        }
     } catch (err) {
-      console.error("Onboarding fetch error:", err);
-      setError("Could not connect to the server. Please try again later.");
+        console.error("Onboarding fetch error:", err);
+        // Ensure network errors also set a string
+        setError("Could not connect to the server. Please try again later.");
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
@@ -103,13 +117,13 @@ const OnboardingPage = () => {
 
               {/* Gender */}
               <div>
-                <label className="block text-sm font-semibold text-black mb-2">
-                  Gender
-                </label>
-                <select name="goal" value={formData.goal} onChange={handleChange} className="select select-bordered border-black rounded-full px-4 py-2 bg-white text-gray-700">
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
+                  <label className="block text-sm font-semibold text-black mb-2">
+                      Gender
+                  </label>
+                  <select name="gender" value={formData.gender} onChange={handleChange} className="select select-bordered border-black rounded-full px-4 py-2 bg-white text-gray-700">
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                  </select>
               </div>
 
               {/* Height */}
@@ -119,6 +133,7 @@ const OnboardingPage = () => {
                 </label>
                 <input
                   required
+                  min="1"
                   type="number"
                   name="height_cm"
                   value={formData.height_cm}
@@ -134,6 +149,7 @@ const OnboardingPage = () => {
                 </label>
                 <input
                   required
+                  min="1"
                   type="number"
                   name="weight_kg"
                   value={formData.weight_kg}
@@ -149,6 +165,7 @@ const OnboardingPage = () => {
                 </label>
                 <input
                   required
+                  min="1"
                   type="number"
                   name="age"
                   value={formData.age}
@@ -162,7 +179,7 @@ const OnboardingPage = () => {
                 <label className="block text-sm font-semibold text-black mb-2 flex items-center gap-2">
                    Activity Level
                 </label>
-                <select name="goal" value={formData.goal} onChange={handleChange} className="select select-bordered border-black rounded-full px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 ">
+                <select name="activity_level" value={formData.activity_level} onChange={handleChange} className="select select-bordered border-black rounded-full px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 ">
                   <option value="sedentary">Sedentary (little to no exercise)</option>
                   <option value="light">Light (exercise 1–3 days/week)</option>
                   <option value="moderate">Moderate (exercise 3–5 days/week)</option>
