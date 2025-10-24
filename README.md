@@ -2,8 +2,9 @@
 
 A full-stack web application demonstrating advanced RAG (Retrieval-Augmented Generation) techniques, personalized user experiences, and modern web architecture.
 
-[Link to your Video Demo] Watch a live walkthrough of NutriGuide in action!
+[![Watch Demo](./assets/dashboard.png)](./assets/nutriguide_demo.mp4)
 
+Watch the demo here!
 ---
 
 ## Overview
