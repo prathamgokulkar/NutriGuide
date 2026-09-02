@@ -1,14 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useSession } from "next-auth/react"; 
 import { motion } from "framer-motion";
 import Button from './Button';
 
-const HeroSection = () => {
+// Isolated component so useSearchParams is inside a Suspense boundary.
+// Next.js 15 requires any component calling useSearchParams() to be
+// wrapped in <Suspense> for static prerendering to succeed.
+const WelcomeToast = () => {
     const router = useRouter();
-    const { data: session } = useSession(); 
     const searchParams = useSearchParams();
     const [welcomeMessage, setWelcomeMessage] = useState(false);
 
@@ -24,13 +25,24 @@ const HeroSection = () => {
         }
     }, [searchParams, router]);
 
+    if (!welcomeMessage) return null;
+
+    return (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-out">
+            Welcome to NutriGuide!
+        </div>
+    );
+};
+
+const HeroSection = () => {
+    const { data: session } = useSession(); 
+
     return (
         <section className=" py-16 md:py-24">
-            {welcomeMessage && (
-                <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-out">
-                    Welcome to NutriGuide!
-                </div>
-            )}
+            {/* Suspense boundary required by Next.js 15 for useSearchParams */}
+            <Suspense fallback={null}>
+                <WelcomeToast />
+            </Suspense>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                 {/* Hero text */}

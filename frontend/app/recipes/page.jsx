@@ -25,7 +25,7 @@ const RecipesPage = () => {
           max_calories: maxCalories ? parseFloat(maxCalories) : null,
         };
 
-        const res = await fetch("http://localhost:8000/recipes/search", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/search`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),

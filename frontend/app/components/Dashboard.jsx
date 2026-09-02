@@ -31,7 +31,7 @@ const Dashboard = () => {
             const fetchSummary = async () => {
                 setIsLoading(true);
                 try {
-                    const res = await fetch(`http://127.0.0.1:8000/dashboard/summary/${session.user.id}`);
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/summary/${session.user.id}`);
                     if (!res.ok) {
                         const errorData = await res.json();
                         throw new Error(errorData.detail || 'Failed to fetch summary');

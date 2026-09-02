@@ -96,7 +96,65 @@ Include high-quality screenshots or short GIFs showcasing the main UI components
 
 ---
 
-## Architecture
+## 🐳 Running with Docker (Recommended)
+
+The entire stack (PostgreSQL, MongoDB, FastAPI backend, Next.js frontend) runs with a single command.
+
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+
+### 1. Set up secrets
+
+```bash
+# Root .env (for docker-compose frontend secrets)
+cp .env.example .env
+
+# Backend secrets (API keys)
+cp backend/.env.example backend/.env
+```
+
+Edit `.env` and `backend/.env` with your actual API keys:
+- `backend/.env`: Add `GROQ_API_KEY`, `PINECONE_API_KEY`, `HF_TOKEN`
+- `.env`: Add `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+
+### 2. Start everything
+
+```bash
+docker compose up --build
+```
+
+On the **first run**, the backend will be built with the ML model pre-cached (~5–10 min depending on your machine). Subsequent starts are instant.
+
+### 3. Initialize the database (first run only)
+
+After containers are running, create the PostgreSQL tables and load the recipe dataset:
+
+```bash
+# Create tables
+docker compose exec backend python create_db.py
+
+# Load recipe data (requires recipes.csv in backend/)
+docker compose exec backend python load_data.py
+```
+
+### 4. Access the app
+
+| Service | URL |
+|---|---|
+| 🌐 Frontend | http://localhost:3000 |
+| ⚡ Backend API | http://localhost:8000 |
+| 📚 API Docs (Swagger) | http://localhost:8000/docs |
+
+### 5. Stop & data management
+
+```bash
+docker compose down          # Stop containers (data persists in volumes)
+docker compose down -v       # Stop + delete all data volumes (clean slate)
+```
+
+---
+
+
 
 This project utilizes a decoupled, microservices-style architecture:
 

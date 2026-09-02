@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
-const mongo_url = "mongodb://localhost:27017/nutriguide";
+// Use MONGODB_URL from environment.
+// Docker Compose injects: mongodb://mongo:27017/nutriguide
+// Local dev (.env.local):  mongodb://localhost:27017/nutriguide
+const mongo_url = process.env.MONGODB_URL || "mongodb://localhost:27017/nutriguide";
+
 
 let cached = global.mongoose;
 if (!cached) {

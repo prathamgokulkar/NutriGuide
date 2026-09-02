@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.git
+.gitignore
+.env.local
+*.env*
+README.md
+Dockerfile
+.dockerignore
+
+# Lint / type checking artifacts
+.eslintcache
+*.tsbuildinfo

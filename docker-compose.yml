@@ -1,0 +1,116 @@
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL — Primary relational database for the backend
+  # ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: nutriguide-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nutriguide
+      POSTGRES_USER: nutriguide
+      POSTGRES_PASSWORD: nutriguide_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - nutriguide-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nutriguide -d nutriguide"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────────────────
+  # MongoDB — Used by the Next.js frontend for user auth
+  # (signup/login via Mongoose)
+  # ──────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: nutriguide-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - nutriguide-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────────────────
+  # Backend — FastAPI (Python) + ML + ChromaDB
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nutriguide-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override DATABASE_URL to use the internal postgres service
+      DATABASE_URL: postgresql://nutriguide:nutriguide_password@postgres:5432/nutriguide
+    volumes:
+      # ChromaDB vector store — persisted across restarts
+      - chroma_data:/app/chroma_db
+    ports:
+      - "8000:8000"
+    networks:
+      - nutriguide-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────────────────────
+  # Frontend — Next.js 15 (React 19)
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* vars are inlined at BUILD TIME by Next.js.
+        # Browser (client-side) fetches go through the host machine,
+        # so they must use localhost (port 8000 is published).
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: nutriguide-frontend
+    restart: unless-stopped
+    environment:
+      # Server-side env vars (not inlined, resolved at runtime)
+      MONGODB_URL: mongodb://mongo:27017/nutriguide
+      NEXTAUTH_URL: http://localhost:3000
+      # Copy secrets from your frontend/.env.local
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    ports:
+      - "3000:3000"
+    networks:
+      - nutriguide-net
+    depends_on:
+      - backend
+
+# ──────────────────────────────────────────────────────────
+# Named volumes — data persists across docker compose down/up
+# ──────────────────────────────────────────────────────────
+volumes:
+  pg_data:
+    name: nutriguide_pg_data
+  mongo_data:
+    name: nutriguide_mongo_data
+  chroma_data:
+    name: nutriguide_chroma_data
+
+# ──────────────────────────────────────────────────────────
+# Internal bridge network — services talk to each other
+# using service names (e.g., postgres:5432, mongo:27017)
+# ──────────────────────────────────────────────────────────
+networks:
+  nutriguide-net:
+    name: nutriguide-net
+    driver: bridge
